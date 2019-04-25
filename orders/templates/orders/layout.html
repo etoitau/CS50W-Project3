@@ -1,0 +1,37 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link href="{% static 'orders/favicon.ico') }}" rel="icon">
+
+        <link rel="stylesheet" type="text/css" href="{% static 'orders/styles.css' %}"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <title>{% block title %}{% endblock %}</title>
+
+    </head>
+
+    <body>
+
+        <div class="navi">
+            <a href="{% url 'index' %}" class="nostyle title">Pinnochio's Pizza</a>
+            <span class="right">
+                {% if user.username %}
+                    <a href="{% url 'logout' %}" class="nostyle">Logout</a>
+                {% else %}
+                    <a href="{% url 'register' %}" class="nostyle">Register</a>&nbsp;
+                    <a href="{% url 'login' %}" class="nostyle">Login</a>
+                {% endif %}
+            </span>
+        </div>
+        {% block content %}{% endblock %}
+    </body>
+
+</html>

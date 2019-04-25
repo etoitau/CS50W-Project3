@@ -1,1 +1,3 @@
-# CS50W-Project3
+# Project 3
+
+Web Programming with Python and JavaScript
