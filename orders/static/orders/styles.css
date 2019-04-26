@@ -3,7 +3,8 @@
 body {
     margin: 0;
     font-family: "Verdana", sans-serif;
-    color: #E0E0E0;
+    background-color: white;
+    color: black;
     height: 100%;
 }
 
@@ -14,11 +15,9 @@ body {
     padding-right: 15px;
     padding-top: auto;
     padding-bottom: auto;
-    background-color: #3A606E;
-    height: 30px;
+    background-color: green;
+    color: white;
     width: 100%;
-    position: fixed;
-    top: 0px;
     line-height: 30px;
 }
 
@@ -38,4 +37,8 @@ a.nostyle, a.nostyle:link, a.nostyle:visited, a.nostyle:hover, a.nostyle:active 
 
 .right {
     float: right;
+}
+
+.content {
+    padding: 15px;
 }

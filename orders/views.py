@@ -2,6 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerEr
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
+from django.contrib.auth.models import User
 
 
 def index(request):
@@ -44,10 +45,10 @@ def register_view(request):
         # check they provided all info and collect it
         user_info = dict()
         for key in ['username', 'first_name', 'last_name', "email", "pass1", "pass2"]:
-            try:
+            if not request.POST[key]:
+                return render(request, "orders/register.html", {"message": f"Missing {key}"})
+            else:
                 user_info[key] = request.POST[key]
-            except:
-                return render(request, "orders/register.html", {"message": (f"Missing %s", key)})
         # check passwords match
         if user_info["pass1"] != user_info["pass2"]:
             return render(request, "orders/register.html", {"message": "Passwords don't match"})
