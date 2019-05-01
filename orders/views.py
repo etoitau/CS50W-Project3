@@ -1,23 +1,79 @@
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, HttpRequest
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.models import User
+from orders.models import *
+
+import logging
+import json
+
+logging.basicConfig(level=logging.DEBUG)
+
+
+def cart(request):
+    """associated with the shopping cart page"""
+    if request.method == 'POST':
+        # ajax calls post to submit order TODO
+        logging.info('cart called post')
+        return 0
+    else:
+        # initialize page
+        logging.info('cart called get')
+        if request.user.is_authenticated:
+            context = {
+                "user": request.user
+            }
+            return render(request, "orders/cart.html", context)
+        else:
+            return render(request, "orders/login.html", {"message": "Log in to see cart"})
+
+
+def getmenuitem(request):
+    """for ajax to get details on a menu item from its id"""
+    logging.info('getmenuitem called')
+    itemid = request.body.decode('utf-8')
+    logging.debug('got id:')
+    logging.debug(itemid)
+    thismenuitem = MenuItem.objects.get(pk=int(itemid))
+    return HttpResponse(thismenuitem.jsonObj(), content_type="application/json")
+
+
+def getoptions(request):
+    """for ajax to retrive possible options for a menu item from its id"""
+    logging.info('getoptions called')
+    itemid = request.body.decode('utf-8')
+    logging.debug('got id:')
+    logging.debug(itemid)
+    thismenuitem = MenuItem.objects.get(pk=int(itemid))
+    options = list(
+        Option.objects.values_list('name', flat=True).filter(category=thismenuitem.category)
+    )
+    logging.debug('got options list:')
+    logging.debug(options)
+    joptions = json.dumps(options)
+    return HttpResponse(joptions, content_type="application/json")
 
 
 def index(request):
+    """associated with the index page"""
+    logging.info('index called')
     if request.user.is_authenticated:
+        logging.info('is authenticated')
         context = {
             "user": request.user
         }
     else:
+        logging.info('is not authenticated')
         context = {
             "user": None
         }
     return render(request, "orders/index.html", context)
 
 def login_view(request):
+    """associated with the login page"""
     if request.method == 'POST':
+        logging.info('login called post')
         try:
             username = request.POST["username"]
         except KeyError:
@@ -34,11 +90,46 @@ def login_view(request):
         else:
             return render(request, "orders/login.html", {"message": "Invalid credentials"})
     else:
+        logging.info('login called get')
         return render(request, "orders/login.html", {"message": None})
 
 def logout_view(request):
+    """log a user out"""
+    logging.info('logout called')
     logout(request)
     return render(request, "orders/login.html", {"message": "Logged out"})
+
+
+def menu(request):
+    """associated with the menu page"""
+    # build menu
+    menu_dict = dict()
+    logging.info('menu called')
+    # get all categories
+    categories = MenuItem.objects.values_list('category__name', flat=True).distinct()
+    for category in categories:
+        menu_dict[category] = dict()
+        menu_dict[category]['sizes'] = MenuItem.objects.values_list('size__name', flat=True).distinct().filter(category__name=category)
+        # get all items in category
+        items = MenuItem.objects.values_list('name', flat=True).distinct().filter(category__name=category)
+        for item in items:
+            menu_dict[category][item] = dict()
+            # get all sizes for item
+            sizes = MenuItem.objects.values_list('size__name', flat=True).distinct().filter(category__name=category, name=item)
+            for size in sizes:
+                menu_dict[category][item][size] = dict()
+                for key in ['option_num', 'id']:
+                    menu_dict[category][item][size][key] = int(MenuItem.objects.values_list(key, flat=True).get(category__name=category, name=item, size__name=size))
+                menu_dict[category][item][size]['price'] = float(MenuItem.objects.values_list('price', flat=True).get(category__name=category, name=item, size__name=size))
+    context = {
+        'menu_dict': menu_dict,
+    }
+    return render(request, "orders/menu.html", context)
+
+
+
+
+
 
 def register_view(request):
     if request.method == 'POST':
@@ -72,4 +163,5 @@ def register_view(request):
     # if coming via GET, serve registration form
     else:
         return render(request, "orders/register.html")
+
 

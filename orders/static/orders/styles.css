@@ -42,3 +42,32 @@ a.nostyle, a.nostyle:link, a.nostyle:visited, a.nostyle:hover, a.nostyle:active 
 .content {
     padding: 15px;
 }
+
+.menutable {
+    border-collapse: collapse;
+}
+
+.menutable td {
+    border: none;
+    padding: 15px;
+    max-width: 270px;
+}
+
+.menutable th {
+    text-align: left;
+    padding: 15px;
+}
+
+.menutable tr:nth-child(even) {
+    background-color: rgba(0, 128, 0, 0.15);
+}
+
+.highlight {
+    background-color: rgba(128, 0, 0, 0.15);
+    font-weight: 600;
+}
+
+h4, h5 {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}

@@ -15,6 +15,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
         <title>{% block title %}{% endblock %}</title>
+        {% block scripts %}{% endblock %}
 
     </head>
 
@@ -32,8 +33,8 @@
             </span>
             {% if user.is_authenticated %}
                 <br>
-                Logged in as: {{ user.username }}
-                <span class="right"><a href="" class="nostyle">Cart/Checkout</a></span>
+                <span id="usernamespan" data-username="{{ user.username }}">Logged in as: {{ user.username }}</span>
+                <span class="right"><a href="{% url 'cart' %}" class="nostyle">Cart<span id="cart_count"></span>/Checkout</a></span>
             {% endif %}
         </div>
         {% block content %}{% endblock %}
