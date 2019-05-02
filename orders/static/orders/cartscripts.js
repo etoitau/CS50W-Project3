@@ -41,43 +41,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     if(cart.count) {
-        updateCartCount(cart.count)
+        updateCartCount(cart.count);
     }
     console.log("cart:");
     console.log(cart);
      
     // build page
-    populate_cart(cart);
+    populate_cart(cart, username);
 
     // add listeners for back to menu and confirm/order
     const back_button = document.getElementById("back_to_menu")
     back_button.addEventListener("click", function (event) {
         localStorage.setItem(username, JSON.stringify(cart));
-        window.location.href = "menu/";
+        window.location.href = "menu";
     });
     const confirm_button = document.getElementById("confirm_order")
     confirm_button.addEventListener("click", function (event) {
-        confirmOrder();
-    });
+        const msg_promise = confirmOrder(cart, username);
+        msg_promise.then(msg => {
+            var content = document.getElementsByClassName("content")
+            content[0].innerHTML = msg;
 
-    // add listeners for delete item buttons
-    document.querySelectorAll('.deleteitem').forEach(function(delbutton) {
-        delbutton.addEventListener("click", function (event) {
-            let num = delbutton.dataset.item_num;
-            delete cart.item[parseInt(num)-1];
-            cart.count -= 1;
-            localStorage.setItem(username, JSON.stringify(cart));
-            // delete from dom
-            var deletediv = document.getElementById(num);
-            deletediv.parentNode.removeChild(deletediv);
-            updateCartCount(cart.count);
         });
     });
+
+    
 });
 
-
-                
-                        
 
 function getMenuItem(itemid) {
     console.log("getMenuItem called with id:");
@@ -107,8 +97,14 @@ function updateCartCount(count) {
 }
 
 
-function populate_cart(cart) {
+function populate_cart(cart, username) {
     console.log("populate_cart called")
+    var total = 0;
+    for (let i = 1; i <= cart.count; i++) {
+        var div = document.createElement('div');
+        div.id = i.toString();
+        document.getElementById('cart_items').appendChild(div);
+    }
     for (let i = 1; i <= cart.count; i++) {
         console.log("i: %i", i);
         console.log("item:");
@@ -126,24 +122,100 @@ function populate_cart(cart) {
                 name: item.name,
                 size: item.size,
                 options: options,
-                price: item.price,
+                price: (item.price / 100).toFixed(2),
             });
-            var div = document.createElement('div');
-            div.id = i.toString();
+            var div = document.getElementById(i.toString())
             div.innerHTML = htmlblock;
-            document.getElementById(cart_items).append(div);
+            // ad delete functionality
+            var delbutton = div.querySelector('.deleteitem')
+            console.log("got button?:")
+            console.log(delbutton)
+            delbutton.addEventListener("click", function (event) {
+                console.log("delete item clicked")
+                let num = parseInt(delbutton.dataset.item_id);
+                console.log("got num:")
+                console.log(num)
+                // if not last, renumber items
+                if (num < cart.count) {
+                    for (let i = num; i < cart.count; i++) {
+                        let j = i + 1;
+                        console.log("cart.items[i]:")
+                        console.log(cart.items[i])
+                        console.log("cart.items[j.toString()]:")
+                        console.log(cart.items[j.toString()])
+                        cart.items[i.toString()] = cart.items[j.toString()];
+                    }
+                }
+                console.log("cart after renumbering:")
+                console.log(cart)
+                // delete last
+                delete cart.items[cart.count.toString()];
+                console.log("cart after deleting last:")
+                console.log(cart)
+
+                cart.count -= 1;
+                updateTotal(cart, username);
+                // delete from dom
+                var myNode = document.getElementById("cart_items");
+                while (myNode.firstChild) {
+                    myNode.removeChild(myNode.firstChild);
+                }
+
+                updateCartCount(cart.count);
+                populate_cart(cart, username)
+            })
+            total += item.price;
+            console.log("running total:")
+            console.log(total)
+            total_str = (total / 100).toFixed(2).toString()
+            document.getElementById("total_field").innerHTML = total_str;
+            cart.total = total;
+            localStorage.setItem(username, JSON.stringify(cart));
         });
+
     }
+    
+    console.log("end of populate_cart")
 }
 
 
-function confirmOrder() {
+function confirmOrder(cart, username) {
+    
     console.log("confirmOrder called");
-    // reset cart in localstorage todo
-    localStorage.removeItem(username)
+    // reset cart in localstorage
+    localStorage.removeItem(username);
+    console.log("local should be clear, try to get?:");
+    console.log(localStorage.getItem(username));
+    // clear page
+    var myNode = document.getElementById("cart_items");
+    while (myNode.firstChild) {
+        myNode.removeChild(myNode.firstChild);
+    }
+    updateCartCount(0);
     // tell server about order
-    const request = new XMLHttpRequest();
-    request.open('POST', '/cart');
-    request.setRequestHeader('X-CSRFToken', csrftoken)
-    request.send(JSON.stringify(cart));
+    return new Promise(function (resolve, reject) {
+        const request = new XMLHttpRequest();
+        request.open('POST', '/cart');
+        request.setRequestHeader('X-CSRFToken', csrftoken);
+        request.setRequestHeader('Content-Type', "application/json");
+        request.onload = () => {
+            // extract json
+            const msg = request.responseText
+            console.log("response from server:")
+            console.log(msg);
+            // return result
+            resolve(msg)
+        }
+        request.send(JSON.stringify(cart));
+    });
+}
+
+function updateTotal(cart, username) {
+    var total = 0;
+    for (let i = 0; i < cart.count; i++) {
+        total += cart.items[i.toString()].price;
+    }
+    document.getElementById("total_field").innerHTML = (total / 100).toFixed(2);
+    cart.total = total;
+    localStorage.setItem(username, JSON.stringify(cart));
 }

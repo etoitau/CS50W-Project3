@@ -37,7 +37,7 @@ class MenuItem(models.Model):
         obj = {
             "category": self.category.name,
             "name": self.name,
-            "price": float(self.price),
+            "price": int(self.price * 100), # return price as number of cents
             "option_num": self.option_num,
             "size": self.size.name,
         }
@@ -64,20 +64,13 @@ class Order(models.Model):
         # note error appears to be pylint bug, works fine
         return f'{self.timestamp} - {self.client.first_name} {self.client.last_name} - ${self.bill} - Fulfilled: {self.fulfilled}'
 
+
 class OrderItem(models.Model):
     """an item in an order"""
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
-    menu_item = models.ManyToManyField(MenuItem, related_name="order_items")
-    options = models.CharField(max_length=512, default=None)
-    
-    def set_options(self, opts):
-        """given a list of options, includes as a json object"""
-        self.options = json.dumps(opts)
-    
-    def get_opts(self):
-        """retrieves options from string"""
-        return json.loads(self.options)
-    
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.PROTECT)
+    options = models.CharField(max_length=512, default="")
+
     def __str__(self):
         return f'{self.menu_item} with: {self.options}'
 

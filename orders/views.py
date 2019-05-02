@@ -16,7 +16,30 @@ def cart(request):
     if request.method == 'POST':
         # ajax calls post to submit order TODO
         logging.info('cart called post')
-        return 0
+        user_cart = json.loads(request.body)
+        logging.debug("recieved cart:")
+        logging.debug(user_cart)
+        this_order = Order.objects.create(
+            client_id=request.user.id,
+            bill=user_cart["total"]/100,
+        )
+        for key, item in user_cart["items"].items():
+            logging.debug("cart item:")
+            logging.debug(item)
+            if not item["options"]:
+                item["options"] = ""
+            m_item = MenuItem.objects.get(pk=int(item["id"]))
+            logging.debug("got menu item:")
+            logging.debug(m_item)
+            o_item = OrderItem.objects.create(
+                order=this_order,
+                menu_item=m_item,
+                options=item["options"],
+            )
+            logging.debug("created order item:")
+            logging.debug(o_item)
+
+        return HttpResponse("Order Placed")
     else:
         # initialize page
         logging.info('cart called get')
@@ -127,11 +150,8 @@ def menu(request):
     return render(request, "orders/menu.html", context)
 
 
-
-
-
-
 def register_view(request):
+    """associated with the register page"""
     if request.method == 'POST':
         # check they provided all info and collect it
         user_info = dict()

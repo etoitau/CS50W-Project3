@@ -22,7 +22,7 @@
     {{#if options }}
         Options: {{options}}<br>
     {{/if}}
-    Price: {{price}}<br>
+    Price: ${{price}}<br>
     <button data-item_id="{{item_num}}" class="deleteitem">Delete Item</button>   
     <br>
     {% endverbatim %}
@@ -37,6 +37,9 @@
     <h3>Cart for: {{user.first_name}} {{user.last_name}}</h3>
     <div id="cart_items">
     </div>
+    <br>
+    Total: $<span id="total_field">0.00</span>
+    <br><br>
     <button id="back_to_menu">Back to Menu</button>
     <button id="confirm_order">Place Order</button>
     

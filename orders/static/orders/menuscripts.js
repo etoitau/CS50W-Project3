@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (options.length) {
                             cart_item.options = options[0].value;
                             for (let i = 1; i < options.length; i++) {
-                                cart_item.options += ", " + option.value
+                                cart_item.options += ", " + options[i].value
                             }
                         }
                         console.log("cart_item:");
