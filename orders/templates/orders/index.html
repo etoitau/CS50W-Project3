@@ -6,6 +6,7 @@
 
 {% block scripts %}
 <script>
+    // update number by cart
     document.addEventListener('DOMContentLoaded', () => {
         console.log("dom loaded");
         const userspan = document.getElementById('usernamespan');
@@ -36,11 +37,12 @@
 <div class="content">
     <h3>Pinocchio's Pizza & Subs</h3>
     {% if message %}
-        <p class="highlight">{{ message }}</p>{% endif %}
+        <p class="highlight">{{ message }}</p>
+    {% endif %}
     <h4>Location</h4>
     <a class="nostyle" target="_blank" href="https://www.google.com/maps/place/74+Winthrop+St,+Cambridge,+MA+02138">
     74 Winthrop St<br>
-    Cambridge, MA 02138
+    Cambridge, MA 02138<br><br>
     </a>
     <h4>Hours</h4>
     <table>

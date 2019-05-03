@@ -1,12 +1,15 @@
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, HttpRequest
+"""Routing for orders"""
+
+import logging
+import json
+
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.models import User
 from orders.models import *
 
-import logging
-import json
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -59,7 +62,7 @@ def getmenuitem(request):
     logging.debug('got id:')
     logging.debug(itemid)
     thismenuitem = MenuItem.objects.get(pk=int(itemid))
-    return HttpResponse(thismenuitem.jsonObj(), content_type="application/json")
+    return HttpResponse(thismenuitem.json_obj(), content_type="application/json")
 
 
 def getoptions(request):
@@ -183,5 +186,3 @@ def register_view(request):
     # if coming via GET, serve registration form
     else:
         return render(request, "orders/register.html")
-
-

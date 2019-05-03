@@ -27,12 +27,14 @@ var template = Handlebars.compile(source);
 // on page load
 document.addEventListener('DOMContentLoaded', () => {
     console.log("dom loaded");
+    
+    // get username
     const userspan = document.getElementById('usernamespan');
     const username = userspan.dataset.username;
     console.log("username:");
     console.log(username);
 
-    // get info from localstorage
+    // get info from localstorage or initialize
     var cart = JSON.parse(localStorage.getItem(username));
     if (!cart) {
         cart = {
@@ -40,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'items': {},
         }
     }
+
+    // update number by cart in navbar
     if(cart.count) {
         updateCartCount(cart.count);
     }
@@ -49,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // build page
     populate_cart(cart, username);
 
-    // add listeners for back to menu and confirm/order
+    // add listeners for back to menu and confirm/order buttons
     const back_button = document.getElementById("back_to_menu")
     back_button.addEventListener("click", function (event) {
         localStorage.setItem(username, JSON.stringify(cart));
@@ -64,12 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         });
     });
-
-    
 });
 
 
 function getMenuItem(itemid) {
+    // sends server menu item id and gets info for display
     console.log("getMenuItem called with id:");
     console.log(itemid)
     return new Promise(function (resolve, reject) {
@@ -92,14 +95,19 @@ function getMenuItem(itemid) {
 
 
 function updateCartCount(count) {
+    // updates number by cart in navbar
     console.log("updateCartCount called")
     document.getElementById("cart_count").innerHTML = "(" + count.toString() + ")"
 }
 
 
 function populate_cart(cart, username) {
+    // displays all cart items and sets up delete functionality
     console.log("populate_cart called")
     var total = 0;
+    if (!cart.count) {
+        document.getElementById("total_field").innerHTML = "0.00";
+    }
     for (let i = 1; i <= cart.count; i++) {
         var div = document.createElement('div');
         div.id = i.toString();
@@ -154,39 +162,36 @@ function populate_cart(cart, username) {
                 console.log(cart)
 
                 cart.count -= 1;
-                updateTotal(cart, username);
-                // delete from dom
+                // refresh cart
                 var myNode = document.getElementById("cart_items");
                 while (myNode.firstChild) {
                     myNode.removeChild(myNode.firstChild);
                 }
-
                 updateCartCount(cart.count);
                 populate_cart(cart, username)
             })
+            // count up total price and display at bottom
             total += item.price;
             console.log("running total:")
             console.log(total)
             total_str = (total / 100).toFixed(2).toString()
             document.getElementById("total_field").innerHTML = total_str;
             cart.total = total;
-            localStorage.setItem(username, JSON.stringify(cart));
         });
-
     }
-    
+    localStorage.setItem(username, JSON.stringify(cart));
     console.log("end of populate_cart")
 }
 
 
 function confirmOrder(cart, username) {
-    
+    // sends order to server
     console.log("confirmOrder called");
     // reset cart in localstorage
     localStorage.removeItem(username);
     console.log("local should be clear, try to get?:");
     console.log(localStorage.getItem(username));
-    // clear page
+    // clear cart in DOM
     var myNode = document.getElementById("cart_items");
     while (myNode.firstChild) {
         myNode.removeChild(myNode.firstChild);
@@ -210,9 +215,12 @@ function confirmOrder(cart, username) {
     });
 }
 
+
 function updateTotal(cart, username) {
+    // not used?
+    // update total when something is deleted
     var total = 0;
-    for (let i = 0; i < cart.count; i++) {
+    for (let i = 1; i <= cart.count; i++) {
         total += cart.items[i.toString()].price;
     }
     document.getElementById("total_field").innerHTML = (total / 100).toFixed(2);

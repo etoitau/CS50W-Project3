@@ -46,4 +46,4 @@ Github:
 https://github.com/etoitau/CS50W-Project3
 
 Youtube walkthrough:
-TODO
+https://youtu.be/PXAU94GE54g

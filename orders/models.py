@@ -1,7 +1,8 @@
+"""models for app: orders"""
+
 import json
 
 from django.db import models
-from django.conf import settings
 from django.contrib.auth.models import User
 
 
@@ -32,7 +33,7 @@ class MenuItem(models.Model):
     def __str__(self):
         return f'{self.size} {self.name} {self.category} for ${self.price}'
 
-    def jsonObj(self):
+    def json_obj(self):
         """return a json version of object"""
         obj = {
             "category": self.category.name,
@@ -73,9 +74,3 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'{self.menu_item} with: {self.options}'
-
-
-
-
-
-
